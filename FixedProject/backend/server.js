@@ -48,14 +48,18 @@ const auth = (req, res, next) => {
 app.post("/signup", async (req, res) => {
     const { username, password } = req.body;
 
-    // --- Validation ---
-    if (!username || username.length < 4) {
-        return res.status(400).json({ message: "Username must be at least 4 characters long." });
-    }
-
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
-    if (!passwordRegex.test(password)) {
-        return res.status(400).json({ message: "Password must be at least 8 characters long, with at least one capital letter and one number." });
+    if (username && typeof username == 'string' && password && typeof password == 'string') {
+            // --- Validation ---
+            if (!username || username.length < 4) {
+                return res.status(400).json({ message: "Username must be at least 4 characters long." });
+            }
+        
+            const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+            if (!passwordRegex.test(password)) {
+                return res.status(400).json({ message: "Password must be at least 8 characters long, with at least one capital letter and one number." });
+            }
+    } else {
+        return res.status(400).json({ message: "type validation failed" });
     }
 
     // --- Check for existing username ---
@@ -76,6 +80,9 @@ app.post("/signup", async (req, res) => {
 
 // Login
 app.post("/login", async (req, res) => {
+    if (!(username && typeof username == 'string' && password && typeof password == 'string')) {
+        return res.status(400).json({ error: "type validation failed" });
+    }
     const { username, password } = req.body;
     const user = await User.findOne({ username });
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
